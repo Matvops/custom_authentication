@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -15,7 +16,7 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function authenticate (Request $request)
+    public function authenticate (Request $request): RedirectResponse
     {
         $credentials = $request->validate(
             [
@@ -63,5 +64,12 @@ class AuthController extends Controller
         Auth::login($user);
 
         return redirect()->intended(route('home'));
+    }
+
+    public function logout(): RedirectResponse
+    {
+        Auth::logout();
+
+        return redirect()->route('login');
     }
 }
