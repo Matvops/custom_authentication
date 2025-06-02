@@ -13,6 +13,10 @@
 
 <body class="bg-light">
 
+    @auth
+        <x-user-bar />
+    @endauth
+
     {{ $content }}
 
     <script src="{{ asset('assets/bootstrap/bootstrap.bundle.min.js') }}"></script>
