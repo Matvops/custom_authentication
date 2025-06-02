@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Mail\NewUserConfirmation;
 use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Illuminate\Support\Str;
@@ -149,5 +151,56 @@ class AuthController extends Controller
         Auth::login($user);
 
         return view('auth.new_user_confirmation');
+    }
+
+    public function profile(): View 
+    {
+        return view('auth.profile');
+    }
+
+    public function changePassword(Request $request) {
+        $request->validate(
+            [
+                'current_password' => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/s',
+                'new_password' => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/|different:current_password',
+                'new_password_confirmation' => 'required|same:new_password',
+            ],  
+            [
+                'current_password.required' => 'A senha atual é obrigatória',
+                'current_password.min' => 'A senha atual deve conter no mínimo :min caracteres.',
+                'current_password.max' => 'A senha atual deve conter no máximo :max caracteres.',
+                'current_password.regex' => 'A senha atual deve conter um caractere maiúsculo, um minúsculo e um dígito.',
+                'new_password.required' => 'A nova senha é obrigatória.',
+                'new_password.min' => 'A nova senha deve conter no mínimo :min caracteres.',
+                'new_password.max' => 'A nova senha deve conter no máximo :max caracteres.',
+                'new_password.regex' => 'A nova senha deve conter pelo menos uma letra maiúscula, uma letra minúscula e um número.',
+                'new_password.different' => 'A nova senha deve ser diferente da senha atual.',
+                'new_password_confirmation.required' => 'A confirmação da nova senha é obrigatória.',
+                'new_password_confirmation.same' => 'A confirmação da nova senha deve ser igual à nova senha.',
+            ]
+        );
+
+        try {
+            DB::beginTransaction();
+
+            if(!password_verify($request->input('current_password'), Auth::user()->password)) {
+                throw new Exception();
+            }
+
+            $user = Auth::user();
+            $user->password = bcrypt($request->new_password);
+            $user->save();
+
+            Auth::user()->password = $request->new_password;
+            
+            DB::commit();
+            return redirect()->route('profile')->with('success', 'Senha alterada com sucesso!');
+        } catch(Exception) {
+            DB::rollBack();
+            return back()
+                ->withInput()
+                ->with('server_error', 'Não foi possível alterar a senha!');
+
+        }
     }
 }
