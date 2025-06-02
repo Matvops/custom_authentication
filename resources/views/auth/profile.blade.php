@@ -28,7 +28,7 @@
                                 <label for="new_password_confirmation" class="form-label">Confirmar a nova senha</label>
                                 <input type="password" class="form-control" id="new_password_confirmation" name="new_password_confirmation">
                                 @error('new_password_confirmation')
-                                    <div class="text-danger">{{ $new_password_confirmation }}</div>
+                                    <div class="text-danger">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -46,6 +46,11 @@
                             </div>
                         @endif
 
+                       @if(session('success'))
+                            <div class="alert alert-success text-center mt-3">
+                                {{ session('success') }}
+                            </div>
+                        @endif
                 </div>
             </div>
         </div>
