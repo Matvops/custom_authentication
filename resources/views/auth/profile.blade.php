@@ -51,6 +51,28 @@
                                 {{ session('success') }}
                             </div>
                         @endif
+
+
+                        <hr>
+
+                        <div class="card border-1 border-danger p-5 text-center my-2">
+                            Se pretender remover a sua conta de usuário de forma permanente, escreva o texto: "ELIMINAR"
+                            e clique no botão abaixo.
+                        
+
+                            <form action="{{ route('profile.delete')}}" method="POST">
+                                @method("DELETE")
+                                @csrf
+
+                                <div class="my-3">
+                                    <input type="text" name="delete_confirmation" class="form-control text-center display-6">
+                                    @error('delete_confirmation')
+                                        <div class="alert alert-danger text-danger my-3">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <button type="submit" class="btn btn-danger">ELIMINAR CONTA</button>
+                            </form>
+                        </div>
                 </div>
             </div>
         </div>
