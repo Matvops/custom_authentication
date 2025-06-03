@@ -250,4 +250,48 @@ class AuthController extends Controller
                         ->with('server_error', 'Falha ao enviar email para recuperação de senha.');
         }
     }
+
+    public function resetPassword($token): View|RedirectResponse
+    {
+        $user = User::where('token', $token)->exists();
+
+        if(!$user) {
+            return redirect()->route('login');
+        }
+
+        return view('auth.reset_password', ['token' => $token]);
+    }
+
+    public function storeNewPassword(Request $request): RedirectResponse
+    {
+        $request->validate(
+            [
+                'token' => 'required',
+                'new_password' => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
+                'new_password_confirmation' => 'required|same:new_password',
+            ],
+            [
+                'new_password.required' => 'A nova senha é obrigatória',
+                'new_password.min' => 'A nova senha deve conter no mínimo :min caracteres',
+                'new_password.max' => 'A nova senha deve conter no mínimo :max caracteres',
+                'new_password.regex' => 'A nova senha deve conter pelo menos uma letra maiúscula, uma letra minúscula e um dígito',
+                'new_password_confirmation.required' => 'A confirmação da nova senha é obrigatória.',
+                'new_password_confirmation.same' => 'A confirmação da nova senha deve ser igual à nova senha.',
+            ]
+            );
+
+        $user = User::where('token', $request->input('token'))->first();
+
+        if(!$user) {
+            return redirect()->route('login');
+        }
+
+        $user->password = bcrypt($request->new_password);
+        $user->token = null;
+        $user->save();
+
+        return redirect()
+                ->route('login')
+                ->with('success', true);
+    }
 }
