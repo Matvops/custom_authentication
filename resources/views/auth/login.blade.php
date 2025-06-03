@@ -31,7 +31,7 @@
                                         <a href="{{ route('register') }}">Não tenho conta de usuário</a>
                                     </div>
                                     <div>
-                                        <a href="{{ route('password.reset') }}">Esqueci a minha senha</a>
+                                        <a href="{{ route('password.forgot') }}">Esqueci a minha senha</a>
                                     </div>
                                 </div>
                                 <div class="col text-end align-self-center">
