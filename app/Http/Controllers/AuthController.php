@@ -294,4 +294,26 @@ class AuthController extends Controller
                 ->route('login')
                 ->with('success', true);
     }
+
+    public function deleteProfile(Request $request): RedirectResponse
+    {
+        $request->validate(
+            [
+                'delete_confirmation' => 'required|in:ELIMINAR'
+            ],
+            [
+                'delete_confirmation.required' => 'Campo de confirmação de delete é obrigatório',
+                'delete_confirmation.in' => 'Texto de confirmação do delete deve ser igual a ELIMINAR'
+            ]
+        );
+
+        $user = Auth::user();
+        $user->delete();
+
+        Auth::logout();
+
+        return redirect()
+                ->route('login')
+                ->with('account_deleted', 'Conta foi deletada com sucesso');
+    }
 }
