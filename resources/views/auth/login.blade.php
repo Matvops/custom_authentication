@@ -45,8 +45,12 @@
                             <div class="alert alert-danger text-center mt-4">{{ session('invalid_login') }}</div>
                         @endsession
 
-                         @if(session('success'))
+                        @if(session('success'))
                             <div class="alert alert-success text-center mt-4">{{ "Senha redefinida com sucesso" }}</div>
+                        @endsession
+
+                        @if(session('account_deleted'))
+                            <div class="alert alert-danger text-center mt-4">{{ session('account_deleted') }}</div>
                         @endsession
 
                     </div>
