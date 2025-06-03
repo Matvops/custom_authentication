@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\NewUserConfirmation;
+use App\Mail\ResetPassword;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -158,7 +159,8 @@ class AuthController extends Controller
         return view('auth.profile');
     }
 
-    public function changePassword(Request $request) {
+    public function changePassword(Request $request): RedirectResponse
+     {
         $request->validate(
             [
                 'current_password' => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/s',
@@ -201,6 +203,51 @@ class AuthController extends Controller
                 ->withInput()
                 ->with('server_error', 'Não foi possível alterar a senha!');
 
+        }
+    }
+
+    public function forgotPassword(): View 
+    {
+        return view('auth.forgot_password');
+    }
+
+    public function sendResetPasswordLink(Request $request) 
+    {
+        $request->validate(
+            [
+                'email' => 'required|email'
+            ],
+            [
+                'email.required' => 'O email é obrigatório',
+                'email.email' => 'O email não é válido.'
+            ]
+        );
+
+        try {
+            $user = User::where('email', $request->email)->first();
+
+            if(!$user) {
+                throw new Exception();
+            }
+
+            $user->token = Str::random(64);
+
+            $link = route('password.reset', ['token' => $user->token]);
+
+            $result = Mail::to($user->email)->send(new ResetPassword($user->username, $link));
+
+            if(!$result) {
+                throw new Exception();
+            }
+
+            $user->save();
+            return back()
+                    ->withInput()
+                    ->with('success', 'Verifique sua caixa de correio eletrônico para prosseguir.');
+        } catch(Exception $e) {
+                return back()
+                        ->withInput()
+                        ->with('server_error', 'Falha ao enviar email para recuperação de senha.');
         }
     }
 }
