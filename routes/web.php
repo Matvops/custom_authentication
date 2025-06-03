@@ -11,6 +11,10 @@ Route::middleware('guest')->group(function() {
     Route::get('/register', [AuthController::class, 'register'])->name('register');
     Route::post('/register', [AuthController::class, 'storeUser'])->name('register.store');
     Route::get('/register_confimartion/{token}', [AuthController::class, 'registerConfirmation'])->name('register.confirmation');
+    Route::get('/reset_password', [AuthController::class, 'forgotPassword'])->name('password.forgot');
+    Route::post('/reset_password', [AuthController::class, 'sendResetPasswordLink'])->name('password.send_link');
+    Route::get('/reset_password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
+    Route::post('/store_new_password', [AuthController::class, 'storeNewPassword'])->name('password.new.store');
 });
 
 Route::middleware('auth')->group(function() {
